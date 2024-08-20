@@ -3,17 +3,15 @@ from django.contrib.auth.decorators import login_required
 from .models import JournalEntry
 from .forms import JournalEntryForm  # Assuming a form for creating/editing
 
-@login_required
-def list(request):
-    entries = JournalEntry.objects.filter(user=request.user)
-    return render(request, 'journal/list.html', {'entries': entries})
 
-@login_required
+def list(request):
+    # entries = JournalEntry.objects.filter(user=request.user)
+    return render(request, 'journal/list.html')
+
 def detail(request, pk):
     entry = get_object_or_404(JournalEntry, pk=pk)
     return render(request, 'journal/detail.html', {'entry': entry})
 
-@login_required
 def create(request):
     if request.method == 'POST':
         form = JournalEntryForm(request.POST)
@@ -26,7 +24,6 @@ def create(request):
         form = JournalEntryForm()
     return render(request, 'journal/create.html', {'form': form})
 
-@login_required
 def update(request, pk):
     entry = get_object_or_404(JournalEntry, pk=pk)
     if request.user != entry.user:
