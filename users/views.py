@@ -25,7 +25,7 @@ def user_login(request):
         if form.is_valid():
             user = form.get_user()
             login(request, user)
-            return redirect('profile')  # Replace with desired redirect URL
+            return redirect('pages:home')  # Replace with desired redirect URL
     else:
         form = AuthenticationForm()
     return render(request, 'users/registration/login.html', {'form': form})
