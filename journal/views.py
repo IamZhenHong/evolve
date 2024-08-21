@@ -5,8 +5,8 @@ from .forms import JournalEntryForm  # Assuming a form for creating/editing
 
 
 def list(request):
-    # entries = JournalEntry.objects.filter(user=request.user)
-    return render(request, 'journal/list.html')
+    entries = JournalEntry.objects.filter(user=request.user)
+    return render(request, 'journal/list.html', {'entries': entries})
 
 def detail(request, pk):
     entry = get_object_or_404(JournalEntry, pk=pk)
@@ -19,7 +19,7 @@ def create(request):
             entry = form.save(commit=False)
             entry.user = request.user
             entry.save()
-            return redirect('list')  # Replace with your desired redirect URL
+            return redirect('journal:list')  # Replace with your desired redirect URL
     else:
         form = JournalEntryForm()
     return render(request, 'journal/create.html', {'form': form})

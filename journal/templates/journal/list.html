@@ -1,14 +1,25 @@
-<!DOCTYPE html>
-<html>
-<head>
-    </head>
-<body>
-    <h1>Journal Entries</h1>
-    <ul>
-        {% for entry in entries %}
-            <li><a href="{% url 'detail' entry.id %}">{{ entry.content }}</a></li>
-        {% endfor %}
-    </ul>
-    <a href="{% url 'create' %}">Create New Entry</a>
-</body>
-</html>
+{% extends "base.html" %}
+
+{% block title %}Journal Entries{% endblock %}
+
+{% block content %}
+    <div class="container mt-4">
+        <h1 class="mb-4">Journal Entries</h1>
+        <div class="row">
+            {% for entry in entries %}
+                <div class="col-md-4 mb-3">
+                    <div class="card">
+                        <div class="card-body">
+                            <p class="card-text">{{ entry.content }}</p>
+                        </div>
+                        <div class="card-footer text-muted">
+                            <!-- Optional: add a timestamp or other metadata here -->
+                            <small>Posted on {{ entry.created_at|date:"F j, Y, g:i a" }}</small>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+        <a href="{% url 'journal:create' %}" class="btn btn-primary mt-3">Create New Entry</a>
+    </div>
+{% endblock %}
