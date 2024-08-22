@@ -8,3 +8,4 @@ class JournalEntry(models.Model):
     # Image,date_updated
     date_created= models.DateTimeField(auto_now_add=True)
     key_characteristics = models.CharField(max_length=100)
+

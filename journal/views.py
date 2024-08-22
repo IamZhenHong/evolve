@@ -43,4 +43,4 @@ def delete(request, pk):
     if request.user != entry.user:
         return HttpResponseForbidden()  # Or handle unauthorized access as needed
     entry.delete()
-    return redirect('list')
+    return redirect('journal:list')

@@ -13,8 +13,10 @@
                             <p class="card-text">{{ entry.content }}</p>
                         </div>
                         <div class="card-footer text-muted">
-                            <!-- Optional: add a timestamp or other metadata here -->
                             <small>Posted on {{ entry.created_at|date:"F j, Y, g:i a" }}</small>
+                            <div class="mt-2">
+                                <a href="{% url 'journal:delete' entry.id %}" class="btn btn-danger">Delete</a>
+                            </div>
                         </div>
                     </div>
                 </div>
