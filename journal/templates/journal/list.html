@@ -11,6 +11,8 @@
                     <div class="card">
                         <div class="card-body">
                             <p class="card-text">{{ entry.content }}</p>
+                            <p class="card-text">{{ entry.summary }}</p>
+                            <p class="card-text">{{ entry.cumulative_summary }}</p>
                         </div>
                         <div class="card-footer text-muted">
                             <small>Posted on {{ entry.created_at|date:"F j, Y, g:i a" }}</small>
