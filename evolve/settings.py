@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'journal',
     'users',
     'pages',
+    'identity_core',
 ]
 
 MIDDLEWARE = [

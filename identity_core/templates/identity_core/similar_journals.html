@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block title %}Similar Journal Entries{% endblock %}
+
+{% block content %}
+    <div class="container mt-4">
+        <h1 class="mb-4">Similar Journal Entries</h1>
+        
+        <!-- Display the original entry -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title">Original Entry #{{ entry.pk }}</h5>
+                <p class="card-text">{{ entry.content }}</p>
+                <p><strong>Summary:</strong> {{ entry.summary }}</p>
+                <p><strong>Cumulative Summary:</strong> {{ entry.cumulative_summary }}</p>
+            </div>
+            <div class="card-footer text-muted">
+                <small>Posted on {{ entry.date_created|date:"F j, Y, g:i a" }}</small>
+            </div>
+        </div>
+
+        <hr>
+        
+        <!-- Display similar journal entries -->
+        <h2>Similar Entries</h2>
+        <div class="row">
+            {% if similar_entries %}
+                {% for similar_entry in similar_entries %}
+                    <div class="col-md-4 mb-3">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">Entry #{{ similar_entry.pk }}</h5>
+                                <p class="card-text">{{ similar_entry.content|truncatewords:30 }}</p>
+                                <p><strong>Summary:</strong> {{ similar_entry.summary }}</p>
+                                <a href="{% url 'journal:detail' similar_entry.pk %}" class="btn btn-link">Read More</a>
+                            </div>
+                            <div class="card-footer text-muted">
+                                <small>Posted on {{ similar_entry.date_created|date:"F j, Y, g:i a" }}</small>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p>No similar entries found.</p>
+            {% endif %}
+        </div>
+
+        <!-- Back link -->
+        <a href="{% url 'journal:detail' entry.pk %}" class="btn btn-primary mt-3">Back to Original Entry</a>
+    </div>
+{% endblock %}

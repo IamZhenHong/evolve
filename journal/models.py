@@ -1,5 +1,7 @@
 from django.db import models
 from django.conf import settings
+from transformers import AutoTokenizer, AutoModel
+import torch
 
 class JournalEntry(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
