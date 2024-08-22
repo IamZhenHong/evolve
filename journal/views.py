@@ -13,17 +13,20 @@ def detail(request, pk):
     return render(request, 'journal/detail.html', {'entry': entry})
 
 def create(request):
+    prompt1 = "Extract the writer's key identity. If undetectable, infer the closest. Use one pronoun or noun.Identity:"
+    prompt2 = "Merge two identity templates, removing duplicates. Output only the pronoun(s) or noun(s).Identity:, not the full sentence."
+
     if request.method == 'POST':
         form = JournalEntryForm(request.POST)
         if form.is_valid():
             current_content = form.cleaned_data['content'][:100]  # Example of extracting summary
-            current_summary = summarise(current_content)
+            current_summary = summarise(current_content,prompt1)
             cumulative_summary = ""
             last_entry = JournalEntry.objects.filter(user=request.user).order_by('-date_created').first()
 
             if last_entry:
-                print(last_entry.content)
-                cumulative_summary = summarise(last_entry.cumulative_summary + "\n\n" + current_summary)
+                print(last_entry.cumulative_summary + "\n\n" + current_summary,prompt2)
+                cumulative_summary = summarise(last_entry.cumulative_summary + "\n\n" + current_summary,prompt2)
             else:
                 cumulative_summary = current_summary
 
