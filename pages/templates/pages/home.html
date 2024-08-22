@@ -1,10 +1,8 @@
-# pages/templates/pages/home.html
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Homepage</title>
-</head>
-<body>
-    {{ content }}
-</body>
-</html>
+{% extends 'base.html' %}
+
+{% block title %}Welcome{% endblock %}
+
+{% block content %}
+<h1>Welcome to Our Website</h1>
+<p>This is the home page of our website. Feel free to explore!</p>
+{% endblock %}

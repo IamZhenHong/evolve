@@ -5,6 +5,9 @@ from .forms import UserRegistrationForm  # Custom registration form if needed
 from .models import CustomUser  # Custom user model if needed
 from django.contrib.auth.decorators import login_required
 
+
+app_name = 'users'
+
 def register(request):
     if request.method == 'POST':
         form = UserRegistrationForm(request.POST)
@@ -22,17 +25,19 @@ def user_login(request):
         if form.is_valid():
             user = form.get_user()
             login(request, user)
-            return redirect('profile')  # Replace with desired redirect URL
+            return redirect('pages:home')  # Replace with desired redirect URL
     else:
         form = AuthenticationForm()
     return render(request, 'users/registration/login.html', {'form': form})
 
 def user_logout(request):
     logout(request)
-    return redirect('home')  # Replace with desired redirect URL
+    return redirect('login')  # Replace with desired redirect URL
 
 @login_required(login_url='/login/')
 def user_profile(request):
+    if not request.session.exists(request.session.session_key):
+        return redirect('login')
     # Access user profile information
     user = request.user
     # ... logic to retrieve user profile data

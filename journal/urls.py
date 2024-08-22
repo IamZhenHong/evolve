@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.urls import path
 from .views import create, update, delete, detail, list
+app_name = 'journal'
 urlpatterns = [
     path('create/', create, name='create'),
     path('update/<int:pk>/', update, name='update'),
