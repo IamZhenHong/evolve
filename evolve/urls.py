@@ -22,4 +22,5 @@ urlpatterns = [
     path('journal/', include('journal.urls')),
     path('', include('users.urls')),
     path('pages/', include('pages.urls')),
+    path('identity_core/', include('identity_core.urls')),
 ]
