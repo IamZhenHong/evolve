@@ -1,11 +1,12 @@
 from django.contrib import admin
 from django.urls import path
-from .views import create, update, delete, detail, list
+from . import views
 app_name = 'journal'
 urlpatterns = [
-    path('create/', create, name='create'),
-    path('update/<int:pk>/', update, name='update'),
-    path('delete/<int:pk>/', delete, name='delete'),
-    path('detail/<int:pk>/', detail, name='detail'),
+    path('create/', views.create, name='create'),
+    path('update/<int:pk>/', views.update, name='update'),
+    path('delete/<int:pk>/', views.delete, name='delete'),
+    path('detail/<int:pk>/', views.detail, name='detail'),
+    path('check/',views.check_neo4j_connection, name='check'),
     path('', list, name='list'),
 ]

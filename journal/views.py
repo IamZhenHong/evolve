@@ -3,6 +3,10 @@ from django.contrib.auth.decorators import login_required
 from .models import JournalEntry
 from .forms import JournalEntryForm  # Assuming a form for creating/editing
 from identity_core.views import summarise
+from django.http import HttpResponseForbidden
+from django.http import JsonResponse
+from neo4j.exceptions import ServiceUnavailable, AuthError
+from .neo4j_config import Neo4jConnection
 
 def list(request):
     entries = JournalEntry.objects.filter(user=request.user)
@@ -61,3 +65,27 @@ def delete(request, pk):
         return HttpResponseForbidden()  # Or handle unauthorized access as needed
     entry.delete()
     return redirect('journal:list')
+
+
+
+
+def check_neo4j_connection(request):
+    try:
+        # Get the driver instance
+        driver = Neo4jConnection.get_driver()
+
+        # Verify the connectivity
+        with driver.session() as session:
+            session.run("RETURN 1")
+        
+        # If successful, return a JSON response indicating success
+        return JsonResponse({"status": "success", "message": "Connected to Neo4j database successfully!"})
+
+    except (ServiceUnavailable, AuthError) as e:
+        # If there's an error, return a JSON response indicating failure
+        return JsonResponse({"status": "error", "message": f"Failed to connect to Neo4j database: {str(e)}"})
+
+    except Exception as e:
+        # Handle any other exceptions
+        return JsonResponse({"status": "error", "message": f"An unexpected error occurred: {str(e)}"})
+
