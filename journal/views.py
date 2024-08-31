@@ -7,9 +7,17 @@ from django.http import HttpResponseForbidden
 from django.http import JsonResponse
 from neo4j.exceptions import ServiceUnavailable, AuthError
 from .neo4j_config import Neo4jConnection
+from .dao.entries import EntryDAO
+from datetime import datetime
+driver = Neo4jConnection.get_driver()
+entry_dao = EntryDAO(driver)
 
 def list(request):
-    entries = JournalEntry.objects.filter(user=request.user)
+    entries = entry_dao.list_entries(request.user.id)  # Ensure this returns the expected data
+    print(entries)
+    if isinstance(entries, list):  # Check if the returned type is list
+        print(entries)
+        # Process the list correctly
     return render(request, 'journal/list.html', {'entries': entries})
 
 def detail(request, pk):
@@ -23,27 +31,25 @@ def create(request):
     if request.method == 'POST':
         form = JournalEntryForm(request.POST)
         if form.is_valid():
-            current_content = form.cleaned_data['content'][:100]  # Example of extracting summary
-            current_summary = summarise(current_content,prompt1)
+            current_content = form.cleaned_data['content'][:100]
+            current_summary = summarise(current_content, prompt1)
             cumulative_summary = ""
-            last_entry = JournalEntry.objects.filter(user=request.user).order_by('-date_created').first()
-
+            last_entry = entry_dao.list_entries(request.user.id)
             if last_entry:
-                print(last_entry.cumulative_summary + "\n\n" + current_summary,prompt2)
-                cumulative_summary = summarise(last_entry.cumulative_summary + "\n\n" + current_summary,prompt2)
+                cumulative_summary = summarise(last_entry.cumulative_summary + "\n\n" + current_summary, prompt2)
             else:
                 cumulative_summary = current_summary
+            current_date = datetime.now() 
 
-            entry = form.save(commit=False)
-            entry.summary = current_summary
-            entry.cumulative_summary = cumulative_summary
-            entry.user = request.user
-            entry.save()
+            entry_dao.create_journal_entry(request.user.id, current_summary, cumulative_summary, form.cleaned_data['content'], current_date)
+            print('Entry created')
 
-            return redirect('journal:list')  # Replace with your desired redirect URL
+            return redirect('journal:list')
     else:
         form = JournalEntryForm()
+    
     return render(request, 'journal/create.html', {'form': form})
+
 
 def update(request, pk):
     entry = get_object_or_404(JournalEntry, pk=pk)
