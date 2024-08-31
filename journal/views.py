@@ -13,15 +13,14 @@ driver = Neo4jConnection.get_driver()
 entry_dao = EntryDAO(driver)
 
 def list(request):
-    entries = entry_dao.list_entries(request.user.id)  # Ensure this returns the expected data
-    print(entries)
-    if isinstance(entries, list):  # Check if the returned type is list
-        print(entries)
-        # Process the list correctly
+    entries = JournalEntry.objects.all()
+    if not isinstance(entries, list):
+        # Log unexpected data types or convert it to a valid format
+        entries = []
     return render(request, 'journal/list.html', {'entries': entries})
 
 def detail(request, pk):
-    entry = get_object_or_404(JournalEntry, pk=pk)
+    
     return render(request, 'journal/detail.html', {'entry': entry})
 
 def create(request):
