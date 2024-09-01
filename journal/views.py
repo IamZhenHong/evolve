@@ -9,20 +9,21 @@ from neo4j.exceptions import ServiceUnavailable, AuthError
 from .neo4j_config import Neo4jConnection
 from .dao.entries import EntryDAO
 from datetime import datetime
+
 driver = Neo4jConnection.get_driver()
 entry_dao = EntryDAO(driver)
 
+@login_required
 def list(request):
-    entries = JournalEntry.objects.all()
-    if not isinstance(entries, list):
-        # Log unexpected data types or convert it to a valid format
-        entries = []
+    entries = JournalEntry.objects.all()  # Queryset, not a list
     return render(request, 'journal/list.html', {'entries': entries})
 
+@login_required
 def detail(request, pk):
     
-    return render(request, 'journal/detail.html', {'entry': entry})
+    return render(request, 'journal/detail.html')
 
+@login_required
 def create(request):
     prompt1 = "Extract the writer's key identity. If undetectable, infer the closest. Use one pronoun or noun.Identity:"
     prompt2 = "Merge two identity templates, removing duplicates. Output only the pronoun(s) or noun(s).Identity:, not the full sentence."
@@ -49,7 +50,7 @@ def create(request):
     
     return render(request, 'journal/create.html', {'form': form})
 
-
+@login_required
 def update(request, pk):
     entry = get_object_or_404(JournalEntry, pk=pk)
     if request.user != entry.user:

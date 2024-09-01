@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'journal',
     'users',
     'pages',
+    'identity_core',
 ]
 
 MIDDLEWARE = [
@@ -126,3 +127,5 @@ STATIC_URL = "static/"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 LOGIN_REDIRECT_URL = 'users: user_login'
+
+X_FRAME_OPTIONS = "SAMEORIGIN"
