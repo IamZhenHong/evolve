@@ -8,5 +8,5 @@ urlpatterns = [
     path('delete/<int:pk>/', views.delete, name='delete'),
     path('detail/<int:pk>/', views.detail, name='detail'),
     path('check/',views.check_neo4j_connection, name='check'),
-    path('', list, name='list'),
+    path('', views.list, name='list'),
 ]
