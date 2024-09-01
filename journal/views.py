@@ -36,9 +36,9 @@ def create(request):
             current_content = form.cleaned_data['content'][:100]
             current_summary = summarise(current_content, prompt1)
             cumulative_summary = ""
-            last_entry = entry_dao.list_entries(request.user.id)
+            last_entry = entry_dao.view_last_entry(request.user.id)
             if last_entry:
-                cumulative_summary = summarise(last_entry.cumulative_summary + "\n\n" + current_summary, prompt2)
+                cumulative_summary = summarise(last_entry[0]['entry'].get('cumulative_summary', '') + "\n\n" + current_summary, prompt2)
             else:
                 cumulative_summary = current_summary
 

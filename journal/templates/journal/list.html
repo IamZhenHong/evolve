@@ -11,13 +11,14 @@
                     <div class="card">
                         <div class="card-body">
                             <h5 class="card-title">Entry #{{ entry.id }}</h5>
-                            <p class="card-text">{{ entry.content|truncatewords:30 }}</p> <!-- Show a truncated version of content -->
-                            <p class="card-text">Key identity: {{ entry.summary }}</p>
+                            <p class="card-text">{{ entry.entry.content|truncatewords:30 }}</p> <!-- Show a truncated version of content -->
+                            <p class="card-text">Key identity: {{ entry.entry.summary }}</p>
+                            <p class="card-text">Cumulative summary: {{ entry.entry.cumulative_summary }}</p>
                             
                             
                         </div>
                         <div class="card-footer text-muted">
-                            <small>Posted on {{ entry.date_created|date:"F j, Y, g:i a" }}</small>
+                            <small>Posted on {{ entry.entry.date_created|date:"F j, Y, g:i a" }}</small>
                             <div class="mt-2">
                                 
                             </div>

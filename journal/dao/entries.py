@@ -23,6 +23,22 @@ class EntryDAO:
             session.write_transaction(
                 self._create_journal_entry_tx, user_id, summary, cumulative_summary, content, date_created
             )
+    
+    def view_last_entry(self, user_id):
+        with self.driver.session() as session:
+            return session.read_transaction(self._view_last_entry_tx, user_id)
+    
+    def _view_last_entry_tx(self, tx, user_id):
+        query = """
+        MATCH (u:User {user_id: $user_id})-[:WROTE]->(e:JournalEntry)
+        RETURN id(e) AS node_id, e
+        ORDER BY e.date_created DESC
+        LIMIT 1
+        """
+        result = tx.run(query, user_id=user_id)
+        return [{'id': record['node_id'], 'entry': record['e']} for record in result]
+    
+
 
     @staticmethod
     def _create_journal_entry_tx(tx, user_id, summary, cumulative_summary, content, date_created):
