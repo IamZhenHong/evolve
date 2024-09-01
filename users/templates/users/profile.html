@@ -4,7 +4,7 @@
 <h1>Profile</h1>
 <p>Username: {{ user.username }}</p>
 <p>Email: {{ user.email }}</p>
-<form action="{% url 'logout' %}" method="post">
+<form action="{% url 'users:logout' %}" method="post">
     {% csrf_token %}
     <button type="submit">Logout</button>
 </form>
