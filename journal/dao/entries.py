@@ -11,12 +11,12 @@ class EntryDAO:
     @staticmethod
     def _list_entries(tx, user_id):
         query = """
-        MATCH (e:JournalEntry {user_id: $user_id})
+        MATCH (u:User {user_id: $user_id})-[:WROTE]->(e:JournalEntry)
         RETURN e
         """
         result = tx.run(query, user_id=user_id)
         return [record["e"] for record in result]
-    
+
 
     def create_journal_entry(self, user_id, summary, cumulative_summary, content, date_created):
         with self.driver.session() as session:
