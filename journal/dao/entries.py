@@ -27,6 +27,7 @@ class EntryDAO:
     @staticmethod
     def _create_journal_entry_tx(tx, user_id, summary, cumulative_summary, content, date_created):
         query = """
+        MATCH (u:User {user_id: $user_id})
         CREATE (j:JournalEntry {
             summary: $summary, 
             cumulative_summary: $cumulative_summary, 

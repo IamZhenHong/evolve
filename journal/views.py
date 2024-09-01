@@ -15,7 +15,7 @@ entry_dao = EntryDAO(driver)
 
 @login_required
 def list(request):
-    entries = JournalEntry.objects.all()  # Queryset, not a list
+    entries = entry_dao.list_entries(request.user.id)
     return render(request, 'journal/list.html', {'entries': entries})
 
 @login_required
@@ -39,6 +39,7 @@ def create(request):
                 cumulative_summary = summarise(last_entry.cumulative_summary + "\n\n" + current_summary, prompt2)
             else:
                 cumulative_summary = current_summary
+                
             current_date = datetime.now() 
 
             entry_dao.create_journal_entry(request.user.id, current_summary, cumulative_summary, form.cleaned_data['content'], current_date)
