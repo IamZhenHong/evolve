@@ -12,10 +12,10 @@ class EntryDAO:
     def _list_entries(tx, user_id):
         query = """
         MATCH (u:User {user_id: $user_id})-[:WROTE]->(e:JournalEntry)
-        RETURN e
+        RETURN id(e) AS node_id, e
         """
         result = tx.run(query, user_id=user_id)
-        return [record["e"] for record in result]
+        return [{'id': record['node_id'], 'entry': record['e']} for record in result]
 
 
     def create_journal_entry(self, user_id, summary, cumulative_summary, content, date_created):
