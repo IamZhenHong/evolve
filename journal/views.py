@@ -46,8 +46,7 @@ def create(request):
 
             current_date = datetime.now() 
             mood = get_mood(form.cleaned_data['content'])
-            print(mood)
-            mood_dao.create_mood(mood)
+    
             entry_dao.create_journal_entry(request.user.id, current_summary, cumulative_summary, form.cleaned_data['content'], current_date,mood)
             print('Entry created')
 
