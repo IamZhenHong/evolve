@@ -2,14 +2,13 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from .models import JournalEntry
 from .forms import JournalEntryForm  # Assuming a form for creating/editing
-from identity_core.views import summarise
+from identity_core.views import summarise, get_mood
 from django.http import HttpResponseForbidden
 from django.http import JsonResponse
 from neo4j.exceptions import ServiceUnavailable, AuthError
 from .neo4j_config import Neo4jConnection
 from .dao.entries import EntryDAO
 from datetime import datetime
-
 driver = Neo4jConnection.get_driver()
 entry_dao = EntryDAO(driver)
 
@@ -45,7 +44,8 @@ def create(request):
 
             current_date = datetime.now() 
 
-            entry_dao.create_journal_entry(request.user.id, current_summary, cumulative_summary, form.cleaned_data['content'], current_date)
+            mood = get_mood(form.cleaned_data['content'])
+            entry_dao.create_journal_entry(request.user.id, current_summary, cumulative_summary, form.cleaned_data['content'], current_date,mood)
             print('Entry created')
 
             return redirect('journal:list')
