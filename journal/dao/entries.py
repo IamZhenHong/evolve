@@ -16,13 +16,6 @@ class EntryDAO:
         """
         result = tx.run(query, user_id=user_id)
         return [{'id': record['node_id'], 'entry': record['e']} for record in result]
-
-
-    def create_journal_entry(self, user_id, summary, cumulative_summary, content, date_created):
-        with self.driver.session() as session:
-            session.write_transaction(
-                self._create_journal_entry_tx, user_id, summary, cumulative_summary, content, date_created
-            )
     
     def view_last_entry(self, user_id):
         with self.driver.session() as session:
@@ -39,21 +32,28 @@ class EntryDAO:
         return [{'id': record['node_id'], 'entry': record['e']} for record in result]
     
 
+    def create_journal_entry(self, user_id, summary, cumulative_summary, content, date_created, mood):
+        with self.driver.session() as session:
+            session.write_transaction(
+                self._create_journal_entry_tx, user_id, summary, cumulative_summary, content, date_created, mood
+            )
 
     @staticmethod
-    def _create_journal_entry_tx(tx, user_id, summary, cumulative_summary, content, date_created):
+    def _create_journal_entry_tx(tx, user_id, summary, cumulative_summary, content, date_created, mood):
         query = """
         MATCH (u:User {user_id: $user_id})
         CREATE (j:JournalEntry {
             summary: $summary, 
             cumulative_summary: $cumulative_summary, 
             content: $content, 
-            date_created: $date_created
+            date_created: $date_created,
+            mood: $mood
         })
         MERGE (u)-[:WROTE]->(j)
         RETURN j
         """
-        tx.run(query, user_id=user_id, summary=summary, cumulative_summary=cumulative_summary, content=content, date_created=date_created)
+        tx.run(query, user_id=user_id, summary=summary, cumulative_summary=cumulative_summary, content=content, date_created=date_created, mood=mood)
+
 
     def get_journal_entries_for_user(self, user_id):
         with self.driver.session() as session:
