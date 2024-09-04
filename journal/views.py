@@ -8,9 +8,11 @@ from django.http import JsonResponse
 from neo4j.exceptions import ServiceUnavailable, AuthError
 from .neo4j_config import Neo4jConnection
 from .dao.entries import EntryDAO
+from .dao.moods import MoodDAO
 from datetime import datetime
 driver = Neo4jConnection.get_driver()
 entry_dao = EntryDAO(driver)
+mood_dao = MoodDAO(driver)
 
 @login_required
 def list(request):
@@ -43,8 +45,9 @@ def create(request):
                 cumulative_summary = current_summary
 
             current_date = datetime.now() 
-
             mood = get_mood(form.cleaned_data['content'])
+            print(mood)
+            mood_dao.create_mood(mood)
             entry_dao.create_journal_entry(request.user.id, current_summary, cumulative_summary, form.cleaned_data['content'], current_date,mood)
             print('Entry created')
 

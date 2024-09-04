@@ -13,7 +13,7 @@
                             <h5 class="card-title">Entry #{{ entry.id }}</h5>
                             <p class="card-text">{{ entry.entry.content|truncatewords:30 }}</p> <!-- Show a truncated version of content -->
                             <p class="card-text">Key identity: {{ entry.entry.summary }}</p>
-                            <p class="card-text">Mood: {{ entry.entry.mood }}</p>
+                            <p class="card-text">Mood: {{ entry.mood }}</p>
                             <p class="card-text">Cumulative summary: {{ entry.entry.cumulative_summary }}</p>
                             
                             
