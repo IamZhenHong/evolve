@@ -19,3 +19,4 @@ def summarise(entry,prompt):
     )
     summary = response.choices[0].message["content"].strip()
     return summary
+

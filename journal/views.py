@@ -34,6 +34,7 @@ def create(request):
         form = JournalEntryForm(request.POST)
         if form.is_valid():
             current_content = form.cleaned_data['content'][:100]
+            print(current_content)
             current_summary = summarise(current_content, prompt1)
             cumulative_summary = ""
             last_entry = entry_dao.view_last_entry(request.user.id)
@@ -50,6 +51,8 @@ def create(request):
             return redirect('journal:list')
     else:
         form = JournalEntryForm()
+        print("no post")
+    
     
     return render(request, 'journal/create.html', {'form': form})
 
