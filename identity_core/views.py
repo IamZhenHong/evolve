@@ -45,47 +45,80 @@ def get_mood(entry):
 # views.py
 
 def get_graph(request):
-    # Get Neo4j driver
+    # Get the Neo4j driver instance
     driver = Neo4jConnection.get_driver()
-    limit = int(request.GET.get('limit', 2))
-    # Create a session
-    with driver.session() as session:
-        # Query all nodes and relationships
+    limit = int(request.GET.get('limit', 10))
+
+    def fetch_data(tx, limit):
+        # Write your Cypher query to fetch nodes and relationships
         query = """
         MATCH (n)-[r]->(m)
         RETURN n, r, m
         LIMIT $limit
         """
-        result = session.run(query,limit=limit)
-
-        nodes = []
+        result = tx.run(query, limit=limit)
+        nodes = {}
         edges = []
 
         for record in result:
-            start_node = record['n']
-            relationship = record['r']
-            end_node = record['m']
+            n = record["n"]
+            m = record["m"]
+            r = record["r"]
 
-            # Add nodes
-            nodes.append({
-                'data': {'id': str(start_node.id), 'label': start_node.get('name', 'No Title')}
-            })
-            nodes.append({
-                'data': {'id': str(end_node.id), 'label': end_node.get('name', 'No Title')}
-            })
+            # Determine the node type and set label accordingly
+            if "JournalEntry" in n.labels:
+                n_label = n.get("summary") or "No Summary"
+            elif "User" in n.labels:
+                n_label = n.get("user_id") or "No User ID"
+            elif "Mood" in n.labels:
+                n_label = n.get("name") or "No Mood"
+            else:
+                n_label = n.get("title") or n.get("name") or "No Label"
+                
+            if "JournalEntry" in m.labels:
+                m_label = m.get("summary") or "No Summary"
+            elif "User" in m.labels:
+                m_label = m.get("user_id") or "No User ID"
+            elif "Mood" in m.labels:
+                m_label = m.get("name") or "No Mood"
+            else:
+                m_label = m.get("title") or m.get("name") or "No Label"
 
-            # Add edges
+            # Add nodes with appropriate label
+            if n.id not in nodes:
+                nodes[n.id] = {
+                    "data": {
+                        "id": n.id,
+                        "label": n_label
+                    }
+                }
+            if m.id not in nodes:
+                nodes[m.id] = {
+                    "data": {
+                        "id": m.id,
+                        "label": m_label
+                    }
+                }
+
+            # Add edge
             edges.append({
-                'data': {
-                    'id': f'{start_node.id}-{relationship.type}-{end_node.id}',
-                    'source': str(start_node.id),
-                    'target': str(end_node.id),
-                    'label': relationship.type
+                "data": {
+                    "source": n.id,
+                    "target": m.id,
+                    "relationship": r.type
                 }
             })
 
-    # Return JSON response
-    return JsonResponse({'nodes': nodes, 'edges': edges})
+        # Convert nodes dictionary to a list
+        nodes_list = list(nodes.values())
+
+        return {"nodes": nodes_list, "edges": edges}
+
+    with driver.session() as session:
+        graph_data = session.execute_read(fetch_data, limit=limit)
+
+    print(graph_data)  # For debugging purposes
+    return JsonResponse(graph_data)
 
 def show_graph(request):
     return render(request, 'identity_core/graph.html')
