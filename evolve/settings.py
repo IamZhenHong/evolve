@@ -131,3 +131,5 @@ LOGIN_REDIRECT_URL = 'users: user_login'
 X_FRAME_OPTIONS = "SAMEORIGIN"
 
 AUTH_USER_MODEL = 'users.CustomUser'
+
+STATIC_ROOT = BASE_DIR / 'staticfiles'

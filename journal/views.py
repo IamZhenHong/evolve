@@ -10,6 +10,9 @@ from .neo4j_config import Neo4jConnection
 from .dao.entries import EntryDAO
 from .dao.moods import MoodDAO
 from datetime import datetime
+
+
+
 driver = Neo4jConnection.get_driver()
 entry_dao = EntryDAO(driver)
 mood_dao = MoodDAO(driver)

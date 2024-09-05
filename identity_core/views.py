@@ -6,10 +6,13 @@ from django.http import JsonResponse
 from journal.neo4j_config import Neo4jConnection
 from py2neo import Graph
 # Create your views here.
+
 load_dotenv()
+
 openai.api_key = os.environ.get('openai_api_key')
 
 driver = Neo4jConnection.get_driver()
+
 def summarise(entry,prompt):
     response = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
