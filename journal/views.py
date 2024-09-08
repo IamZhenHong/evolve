@@ -77,7 +77,7 @@ def update(request, pk):
 
 @login_required
 def delete(request, pk):
-    entry = get_object_or_404(JournalEntry, pk=pk)
+    entry_dao.delete_journal_entry()
     if request.user != entry.user:
         return HttpResponseForbidden()  # Or handle unauthorized access as needed
     entry.delete()

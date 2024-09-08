@@ -6,12 +6,52 @@ from django.http import JsonResponse
 from journal.neo4j_config import Neo4jConnection
 from py2neo import Graph
 # Create your views here.
-
 load_dotenv()
 
-openai.api_key = os.environ.get('openai_api_key')
+from google.cloud import secretmanager
 
+client = secretmanager.SecretManagerServiceClient()
+
+
+# Define the project and secret information
+project_id = "empyrean-button-434915-s8"
+secret_id = "evolve"
+secret_version = "latest"
+
+# Build the secret version resource name
+secret_version_name = f"projects/{project_id}/secrets/{secret_id}/versions/{secret_version}"
+
+# Access the secret version
+response = client.access_secret_version(name=secret_version_name)
+
+# Extract the secret payload
+secret_payload = response.payload.data.decode("UTF-8")
+
+# Debug: print secret payload to verify contents
+print("Secret payload:", secret_payload)
+
+# Split the secret payload into environment variables
+secret_lines = secret_payload.split('\n')
+secrets = {}
+for line in secret_lines:
+    if '=' in line:
+        key, value = line.split('=', 1)
+        secrets[key.strip()] = value.strip().strip('"')  # Strips whitespace and surrounding quotes
+
+# Debug: print extracted secrets to verify
+print("Extracted secrets:", secrets)
+
+# Retrieve and set OpenAI API key
+api_key = secrets.get("openai_api_key")
+if api_key:
+    openai.api_key = api_key
+    print("OpenAI API key set successfully.")
+else:
+    print("Failed to retrieve OpenAI API key from secrets.")
+
+neo4j_uri = secrets.get("NEO4J_URI")
 driver = Neo4jConnection.get_driver()
+
 
 def summarise(entry,prompt):
     response = openai.ChatCompletion.create(
@@ -24,6 +64,7 @@ def summarise(entry,prompt):
         max_tokens=150,
         temperature=0.5,
     )
+
     summary = response.choices[0].message["content"].strip()
     return summary
 

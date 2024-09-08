@@ -46,7 +46,7 @@ substitutions:
   _INSTANCE_NAME: evolve
   _REGION: asia-southeast1
   _SERVICE_NAME: evolve
-  _SECRET_SETTINGS_NAME: django_settings
+  _SECRET_SETTINGS_NAME: evolve
 
 images:
   - "gcr.io/${PROJECT_ID}/${_SERVICE_NAME}"

@@ -133,3 +133,11 @@ X_FRAME_OPTIONS = "SAMEORIGIN"
 AUTH_USER_MODEL = 'users.CustomUser'
 
 STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+CORS_ALLOWED_ORIGINS = [
+    'https://evolve-596278062087.asia-southeast1.run.app',
+]
+
+CSRF_TRUSTED_ORIGINS = [
+    'https://evolve-596278062087.asia-southeast1.run.app',
+]
