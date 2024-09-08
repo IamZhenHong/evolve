@@ -1,5 +1,5 @@
 from neo4j import GraphDatabase
-
+import hashlib
 class EntryDAO:
     def __init__(self, driver):
         self.driver = driver
@@ -70,3 +70,20 @@ class EntryDAO:
         """
         result = tx.run(query, user_id=user_id)
         return [{'entry': record['j'], 'mood': record.get('mood')} for record in result]
+
+    def delete_journal_entry(self, node_id):
+        with self.driver.session() as session:
+            session.write_transaction(self._delete_journal_entry_tx, node_id)
+
+        
+    @staticmethod
+    def _delete_journal_entry_tx(tx, node_id):
+        # Match the JournalEntry by its node ID and delete it
+        query = """
+        MATCH (e:JournalEntry)
+        WHERE id(e) = $node_id
+        OPTIONAL MATCH (e)-[r:HAS_MOOD]->(m:Mood)
+        DETACH DELETE e
+        """
+        tx.run(query, node_id=node_id)
+

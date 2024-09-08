@@ -10,24 +10,24 @@
         </div>
         <div class="row">
             {% for entry in entries %}
-                <div class="col-md-4 mb-3">
-                    <div class="card">
+                <div class="col-md-4 mb-4">
+                    <div class="card shadow-sm border-light">
                         <div class="card-body">
                             <h5 class="card-title">Entry #{{ entry.id }}</h5>
                             <p class="card-text">{{ entry.entry.content|truncatewords:30 }}</p> <!-- Show a truncated version of content -->
-                            <p class="card-text">Key identity: {{ entry.entry.summary }}</p>
-                            <p class="card-text">Mood: {{ entry.mood }}</p>
-                            <p class="card-text">Cumulative summary: {{ entry.entry.cumulative_summary }}</p>
+                            <p class="card-text"><strong>Key Identity:</strong> {{ entry.entry.summary }}</p>
+                            <p class="card-text"><strong>Mood:</strong> {{ entry.mood }}</p>
+                            <p class="card-text"><strong>Cumulative Summary:</strong> {{ entry.entry.cumulative_summary }}</p>
                         </div>
-                        <div class="card-footer text-muted d-flex justify-content-between align-items-center">
-                            <small>Posted on {{ entry.entry.date_created|date:"F j, Y, g:i a" }}</small>
+                        <div class="card-footer d-flex justify-content-between align-items-center">
+                            <small class="text-muted">Posted on {{ entry.entry.date_created|date:"F j, Y, g:i a" }}</small>
                             <div>
                                 <!-- Detail Button -->
-                                <a href="{% url 'journal:detail' entry.id %}" class="btn btn-sm btn-info">Details</a>
-                                <!-- Delete Button (you can confirm deletion with a confirmation dialog) -->
+                                <a href="{% url 'journal:detail' entry.id %}" class="btn btn-info btn-sm">Details</a>
+                                <!-- Delete Button -->
                                 <form action="{% url 'journal:delete' entry.id %}" method="post" style="display:inline;">
                                     {% csrf_token %}
-                                    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this entry?');">Delete</button>
+                                    <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to delete this entry?');">Delete</button>
                                 </form>
                             </div>
                         </div>

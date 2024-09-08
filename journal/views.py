@@ -79,12 +79,10 @@ def update(request, pk):
     return render(request, 'journal/update.html', {'form': form})
 
 @login_required
-def delete(request, pk):
-    entry_dao.delete_journal_entry()
-    if request.user != entry.user:
-        return HttpResponseForbidden()  # Or handle unauthorized access as needed
-    entry.delete()
-    return redirect('journal:list')
+def delete(request, node_id):
+    entry_dao.delete_journal_entry(node_id)
+    
+    return redirect('journal:list') 
 
 
 
