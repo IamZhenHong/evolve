@@ -5,3 +5,21 @@ __pycache__/
 
 # Ignore SQLite database
 db.sqlite3
+
+# Bytecode files
+*.pyc
+*.pyo
+*.pyd
+__pycache__/
+
+# Virtual environment
+venv/
+env/
+evolve/lib/python3.11/site-packages/
+
+# SQLite database
+*.sqlite3
+
+# Other temporary files
+*.log
+*.tmp
