@@ -31,8 +31,11 @@ def detail(request, pk):
 
 @login_required
 def create(request):
-    prompt1 = "Extract the writer's key identity. If undetectable, infer the closest. Use one pronoun or noun.Identity:"
-    prompt2 = "Merge two identity templates, removing duplicates. Output only the pronoun(s) or noun(s).Identity:, not the full sentence."
+    prompt1 = "Instruction: Extract the writer's key identity from the provided text. If the key identity is undetectable, infer the closest identity. Use one pronoun or noun. Example: Suppose the text provided is 'I often find myself analyzing situations and thinking deeply about life.' The key identity extracted might be 'Thinker.' Input Format: - Text: Provide a piece of text where the writer's key identity needs to be extracted. - Prompt: 'Extract the writer's key identity. If undetectable, infer the closest. Use one pronoun or noun. Identity:' Output Format: - Identity: The most relevant pronoun or noun that represents the key identity of the writer."
+
+
+    prompt2 = "Instruction: Merge two identity templates by removing duplicates. Output only the pronoun(s) or noun(s) representing the identities. Example: Suppose the two identities are 'Thinker' and 'Learner.' The merged output would be 'Thinker, Learner.' Input Format: - Identities: Provide two sets of identities to be merged. - Prompt: 'Merge two identity templates, removing duplicates. Output only the pronoun(s) or noun(s). Identity:, not the full sentence.'Output Format: - Identity: A single list of pronouns or nouns, with duplicates removed, from the provided identities."
+
 
     if request.method == 'POST':
         form = JournalEntryForm(request.POST)

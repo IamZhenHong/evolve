@@ -57,7 +57,7 @@ def summarise(entry,prompt):
     response = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
         messages=[
-            {"role": "system", "content": "You are an experienced People Reader that is able to deduce the key identity exhbiited by the person who wrote the journal entry."},
+            {"role": "system", "content": "You are an advanced assistant that specializes in analyzing text to extract key identities and merging identity templates while eliminating duplicates. You understand the importance of precise language and will output identities in the form of pronouns or nouns, ensuring clarity and accuracy."},
             {"role": "user", "content": entry},
             {"role": "assistant", "content": prompt},
         ],
