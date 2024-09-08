@@ -5,6 +5,10 @@ from dotenv import load_dotenv
 from django.http import JsonResponse
 from journal.neo4j_config import Neo4jConnection
 from py2neo import Graph
+from neo4j import GraphDatabase
+from pandas import DataFrame
+from neo4j_graph_data_science import GraphDataScience as gds  # Import the GDS library
+
 # Create your views here.
 load_dotenv()
 openai.api_key = os.environ.get('openai_api_key')
@@ -69,7 +73,7 @@ def get_graph(request):
             if "JournalEntry" in n.labels:
                 n_label = n.get("summary") or "No Summary"
             elif "User" in n.labels:
-                n_label = n.get("user_id") or "No User ID"
+                n_label = "You  "
             elif "Mood" in n.labels:
                 n_label = n.get("name") or "No Mood"
             else:
@@ -122,3 +126,55 @@ def get_graph(request):
 
 def show_graph(request):
     return render(request, 'identity_core/graph.html')
+
+
+
+def project_graph(driver):
+    with driver.session() as session:
+        result = session.write_transaction(lambda tx: gds.graph.project(
+            "communities",  # Graph name
+            "*",  # Node projection for all nodes
+            {
+                "_ALL_": {
+                    "type": "*",
+                    "orientation": "UNDIRECTED",
+                    "properties": {"weight": {"property": "*", "aggregation": "COUNT"}},
+                }
+            },
+        ))
+        return result
+
+def run_community_detection(driver):
+    with driver.session() as session:
+        community_result = session.read_transaction(lambda tx: gds.louvain.stream("communities"))
+        communities = []
+        for record in community_result:
+            communities.append({"nodeId": record['nodeId'], "communityId": record['communityId']})
+        return communities
+
+def graph_view(request):
+    # Get the Neo4j driver instance
+    driver = Neo4jConnection.get_driver()
+
+    # Project the graph
+    project_graph(driver)
+
+    # Run community detection
+    communities = run_community_detection(driver)
+
+    # Prepare data for rendering
+    context = {
+        "communities": communities,
+    }
+
+    # Render the template
+    return render(request, 'graph_view.html', context)
+
+def graph_data(request):
+    # Get the Neo4j driver instance
+    driver = Neo4jConnection.get_driver()
+
+    # Return graph data in JSON format
+    with driver.session() as session:
+        result = session.read_transaction(lambda tx: gds.graph.read("communities"))
+    return JsonResponse(result)
