@@ -4,17 +4,30 @@ from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from .forms import UserRegistrationForm  # Custom registration form if needed
 from .models import CustomUser  # Custom user model if needed
 from django.contrib.auth.decorators import login_required
+from journal.neo4j_config import Neo4jConnection
+from .users import UserDAO
 
 
-app_name = 'users'
+driver = Neo4jConnection.get_driver()
+user_dao = UserDAO(driver)
 
 def register(request):
     if request.method == 'POST':
         form = UserRegistrationForm(request.POST)
         if form.is_valid():
             user = form.save()
+            
             login(request, user)
-            return redirect('home')  # Replace with desired redirect URL
+
+            if user.id is None:
+                print("Error: User ID is None after saving the user.")
+            else:
+                print(f"User ID: {user.id}")
+                print(f"Username: {user.username}")
+
+            user_dao.create_user(user.id)  # Use the DAO to create the user in Neo4j
+
+            return redirect('users:profile')  # Replace with desired redirect URL
     else:
         form = UserRegistrationForm()
     return render(request, 'users/registration/register.html', {'form': form})
@@ -24,15 +37,19 @@ def user_login(request):
         form = AuthenticationForm(data=request.POST)
         if form.is_valid():
             user = form.get_user()
-            login(request, user)
-            return redirect('pages:home')  # Replace with desired redirect URL
+            if user is not None and user.check_password(request.POST['password']):
+                print(f"Authenticated User: {user.username}")
+                login(request, user)
+                return redirect('pages:home')
+            else:
+                print("Authentication failed.")
     else:
         form = AuthenticationForm()
     return render(request, 'users/registration/login.html', {'form': form})
 
 def user_logout(request):
     logout(request)
-    return redirect('login')  # Replace with desired redirect URL
+    return redirect('users:login')  # Replace with desired redirect URL
 
 @login_required(login_url='/login/')
 def user_profile(request):

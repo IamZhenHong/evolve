@@ -5,7 +5,6 @@ class CustomUser(AbstractUser):
     # Your custom user fields here
     bio = models.TextField(blank=True, null=True)
    
-
     groups = models.ManyToManyField(
         'auth.Group',
         related_name='custom_user_set',
