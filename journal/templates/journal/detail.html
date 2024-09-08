@@ -15,6 +15,7 @@
             <div class="card-footer text-muted">
                 <small>Posted on {{ entry.date_created|date:"F j, Y, g:i a" }}</small>
                 <div class="mt-2">
+                    <a href="{% url 'identity_core:similar_journal' entry.pk %}" class="btn btn-primary">Find similar</a>
                     <a href="{% url 'journal:delete' entry.pk %}" class="btn btn-danger">Delete</a>
                     <a href="{% url 'journal:list' %}" class="btn btn-secondary">Back to Entries</a>
                 </div>

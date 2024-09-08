@@ -11,20 +11,64 @@ from neo4j_graph_data_science import GraphDataScience as gds  # Import the GDS l
 
 # Create your views here.
 load_dotenv()
-openai.api_key = os.environ.get('openai_api_key')
 
+from google.cloud import secretmanager
+
+client = secretmanager.SecretManagerServiceClient()
+
+
+# Define the project and secret information
+project_id = "empyrean-button-434915-s8"
+secret_id = "evolve"
+secret_version = "latest"
+
+# Build the secret version resource name
+secret_version_name = f"projects/{project_id}/secrets/{secret_id}/versions/{secret_version}"
+
+# Access the secret version
+response = client.access_secret_version(name=secret_version_name)
+
+# Extract the secret payload
+secret_payload = response.payload.data.decode("UTF-8")
+
+# Debug: print secret payload to verify contents
+print("Secret payload:", secret_payload)
+
+# Split the secret payload into environment variables
+secret_lines = secret_payload.split('\n')
+secrets = {}
+for line in secret_lines:
+    if '=' in line:
+        key, value = line.split('=', 1)
+        secrets[key.strip()] = value.strip().strip('"')  # Strips whitespace and surrounding quotes
+
+# Debug: print extracted secrets to verify
+print("Extracted secrets:", secrets)
+
+# Retrieve and set OpenAI API key
+api_key = secrets.get("openai_api_key")
+if api_key:
+    openai.api_key = api_key
+    print("OpenAI API key set successfully.")
+else:
+    print("Failed to retrieve OpenAI API key from secrets.")
+
+neo4j_uri = secrets.get("NEO4J_URI")
 driver = Neo4jConnection.get_driver()
+
+
 def summarise(entry,prompt):
     response = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
         messages=[
-            {"role": "system", "content": "You are an experienced People Reader that is able to deduce the key identity exhbiited by the person who wrote the journal entry."},
+            {"role": "system", "content": "You are an advanced assistant that specializes in analyzing text to extract key identities and merging identity templates while eliminating duplicates. You understand the importance of precise language and will output identities in the form of pronouns or nouns, ensuring clarity and accuracy."},
             {"role": "user", "content": entry},
             {"role": "assistant", "content": prompt},
         ],
         max_tokens=150,
         temperature=0.5,
     )
+
     summary = response.choices[0].message["content"].strip()
     return summary
 
