@@ -16,6 +16,7 @@ __pycache__/
 venv/
 env/
 evolve/lib/python3.11/site-packages/
+/evolve/
 
 # SQLite database
 *.sqlite3
