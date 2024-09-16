@@ -1,51 +1,15 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Graph Communities</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-        th, td {
-            border: 1px solid #ddd;
-            padding: 8px;
-            text-align: left;
-        }
-        th {
-            background-color: #f4f4f4;
-        }
-        tr:nth-child(even) {
-            background-color: #f9f9f9;
-        }
-    </style>
-</head>
-<body>
-    <h1>Community Detection Results</h1>
-    <table>
-        <thead>
-            <tr>
-                <th>Node ID</th>
-                <th>Community ID</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for community in communities %}
-            <tr>
-                <td>{{ community.nodeId }}</td>
-                <td>{{ community.communityId }}</td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="2">No data available.</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-</body>
-</html>
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Community Summaries</h1>
+    {% for community in communities %}
+        <div class="community">
+            <h2>{{ community.community }}</h2>
+            <div class="summary">
+                <p>{{ community.summary }}</p>
+            </div>
+        </div>
+    {% empty %}
+        <p>No communities found.</p>
+    {% endfor %}
+{% endblock %}

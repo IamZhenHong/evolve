@@ -7,6 +7,8 @@ from journal.neo4j_config import Neo4jConnection
 from py2neo import Graph
 from neo4j import GraphDatabase
 from pandas import DataFrame
+import json
+from .models import CommunitySummary
 # from neo4j_graph_data_science import GraphDataScience as gds  # Import the GDS library
 
 # Create your views here.
@@ -73,14 +75,23 @@ def summarise(entry,prompt):
     return summary
 
 def community_summary(request):
+
+    existing_communities = CommunitySummary.objects.first()
+
+    if existing_communities:
+        return render(request, 'identity_core/community.html', {
+            'communities': existing_communities.communities
+        })
+
     with driver.session() as session:
         # Execute the Cypher query
         result = session.run("""
             MATCH (n)-[r]->(m)
-            WHERE exists(n.community) AND exists(m.community) AND n.community = m.community
+            WHERE n.community IS NOT NULL AND m.community IS NOT NULL AND n.community = m.community
             WITH n.community AS community, collect(n) AS nodes, collect(r) AS relationships
             RETURN community, nodes, relationships
             ORDER BY community;
+
         """)
 
         # Initialize a list to store community summaries
@@ -95,11 +106,14 @@ def community_summary(request):
             # Summarize the nodes
             node_summary = []
             for node in nodes:
-                node_summary.append({
-                    'id': node.id,
-                    'labels': list(node.labels),
-                    'properties': dict(node.items())
-                })
+
+                # Access node properties using node.get('property_name') method
+                summary = node.get('summary')  # Replace 'summary' with the actual property name if it's different
+                if summary is not None:
+                    node_summary.append({
+                        'summary': summary,
+                    })
+
 
             # Summarize the relationships
             relationship_summary = []
@@ -108,7 +122,7 @@ def community_summary(request):
                     'start': rel.start_node.id,
                     'end': rel.end_node.id,
                     'type': rel.type,
-                    'properties': dict(rel.items())
+    
                 })
             
             # Add the community summary
@@ -120,23 +134,30 @@ def community_summary(request):
                 'relationships': relationship_summary
             })
         for community in communities:
+            community_summary_input = (
+            f"Node Summary:\n{community['nodes']}\n\n"
+            f"Relationship Summary:\n{community['relationships']}\n\n"
+            "Please provide a comprehensive summary that highlights key emotional and event-related themes within this community."
+        )
             response = openai.ChatCompletion.create(
             
                 model="gpt-3.5-turbo",
                 messages=[
-                    {"role": "system", "content": "You are a summarization assistant with a focus on capturing the emotional and event landscape of a community based on detailed node and relationship summaries from a graph database."},
-                    {"role": "user", community: },
-                    {"role": "assistant", "content": " I need a comprehensive summary that highlights key emotional and event-related themes within the community."},
+                    {"role": "system", "content": "You are a summarization assistant focused on capturing the emotional and event landscape from journal entries by a single user and associated moods."},
+                    {"role": "user", "content": community_summary_input},
+                    {"role": "assistant", "content": "Provide a summary highlighting the key emotional and event-related themes within these journal entries by a single user and their moods.Be elaborate"}  
                 ],
                 max_tokens=150,
                 temperature=0.5,
             )
             print(response.choices[0].message["content"].strip())
             community['summary'] = response.choices[0].message["content"].strip()
-
-
+        
+    
+    
+    CommunitySummary.objects.create(communities=communities)
     # Pass the community summaries to the template
-    return render(request, 'community_summary.html', {
+    return render(request, 'identity_core/community.html', {
         'communities': communities
     })
 
