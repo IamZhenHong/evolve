@@ -26,8 +26,10 @@ def list(request):
 
 @login_required
 def detail(request, pk):
-    
-    return render(request, 'journal/detail.html')
+    entry = entry_dao.get_entry_by_id(pk)
+    if (entry is None):
+        print("Entry not found")
+    return render(request, 'journal/detail.html', {'entry': entry})
 
 @login_required
 def create(request):
@@ -51,9 +53,9 @@ def create(request):
                 cumulative_summary = current_summary
 
             current_date = datetime.now() 
-            mood = get_mood(form.cleaned_data['content'])
+            moods = get_mood(form.cleaned_data['content'])
     
-            entry_dao.create_journal_entry(request.user.id, current_summary, cumulative_summary, form.cleaned_data['content'], current_date,mood)
+            entry_dao.create_journal_entry(request.user.id, current_summary, cumulative_summary, form.cleaned_data['content'], current_date,moods)
             print('Entry created')
 
             return redirect('journal:list')

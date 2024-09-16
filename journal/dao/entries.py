@@ -34,28 +34,35 @@ class EntryDAO:
         result = tx.run(query, user_id=user_id)
         return [{'id': record['node_id'], 'entry': record['e'], 'mood': record.get('mood')} for record in result]
 
-    def create_journal_entry(self, user_id, summary, cumulative_summary, content, date_created, mood):
+    def create_journal_entry(self, user_id, summary, cumulative_summary, content, date_created, moods):
         with self.driver.session() as session:
             session.write_transaction(
-                self._create_journal_entry_tx, user_id, summary, cumulative_summary, content, date_created, mood
+                self._create_journal_entry_tx, user_id, summary, cumulative_summary, content, date_created, moods
             )
 
     @staticmethod
-    def _create_journal_entry_tx(tx, user_id, summary, cumulative_summary, content, date_created, mood):
+    def _create_journal_entry_tx(tx, user_id, summary, cumulative_summary, content, date_created, moods):
+        # Use MERGE to ensure unique JournalEntry nodes
         query = """
         MATCH (u:User {user_id: $user_id})
-        CREATE (j:JournalEntry {
+        MERGE (j:JournalEntry {
             summary: $summary, 
             cumulative_summary: $cumulative_summary, 
             content: $content, 
             date_created: $date_created
         })
-        MERGE (m:Mood {name: $mood})
-        MERGE (j)-[:HAS_MOOD]->(m)
         MERGE (u)-[:WROTE]->(j)
-        RETURN j, m
         """
-        tx.run(query, user_id=user_id, summary=summary, cumulative_summary=cumulative_summary, content=content, date_created=date_created, mood=mood)
+        tx.run(query, user_id=user_id, summary=summary, cumulative_summary=cumulative_summary, content=content, date_created=date_created)
+
+        # Create or merge Mood nodes and establish relationships
+        for mood in moods:
+            mood_query = """
+            MATCH (j:JournalEntry {summary: $summary, cumulative_summary: $cumulative_summary, content: $content, date_created: $date_created})
+            MERGE (m:Mood {name: $mood})
+            MERGE (j)-[:HAS_MOOD]->(m)
+            """
+            tx.run(mood_query, summary=summary, cumulative_summary=cumulative_summary, content=content, date_created=date_created, mood=mood)
 
     def get_journal_entries_for_user(self, user_id):
         with self.driver.session() as session:
@@ -86,4 +93,22 @@ class EntryDAO:
         DETACH DELETE e
         """
         tx.run(query, node_id=node_id)
+
+    def get_entry_by_id(self, node_id):
+        with self.driver.session() as session:
+            return session.read_transaction(self._get_entry_by_id_tx, node_id)
+
+    @staticmethod
+    def _get_entry_by_id_tx(tx, node_id):
+        query = """
+        MATCH (e:JournalEntry)
+        WHERE id(e) = $node_id
+        OPTIONAL MATCH (e)-[:HAS_MOOD]->(m:Mood)
+        RETURN e, m.name AS mood
+        """
+        result = tx.run(query, node_id=node_id)
+        record = result.single()
+        if record:
+            return {'entry': record['e'], 'mood': record.get('mood')}
+        return None
 

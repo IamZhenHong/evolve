@@ -32,9 +32,12 @@ for line in secret_lines:
         secrets[key] = value
 
 # Extract the variables
-uri = secrets.get("NEO4J_URI")
-user = secrets.get("NEO4J_USERNAME")
-password = secrets.get("NEO4J_PASSWORD")
+# uri = secrets.get("NEO4J_URI")
+# user = secrets.get("NEO4J_USERNAME")
+# password = secrets.get("NEO4J_PASSWORD")
+uri = 'neo4j://34.124.193.227:7687'
+user = 'neo4j'
+password = 'honghong'
 
 
 

@@ -7,7 +7,7 @@ from journal.neo4j_config import Neo4jConnection
 from py2neo import Graph
 from neo4j import GraphDatabase
 from pandas import DataFrame
-from neo4j_graph_data_science import GraphDataScience as gds  # Import the GDS library
+# from neo4j_graph_data_science import GraphDataScience as gds  # Import the GDS library
 
 # Create your views here.
 load_dotenv()
@@ -73,21 +73,33 @@ def summarise(entry,prompt):
     return summary
 
 def get_mood(entry):
-    prompt = "Extract the mood exhibited by the writer in the form of a single noun, and nothing else."
+    prompt = (
+        "Extract all the distinct moods or emotions exhibited by the writer from the journal entry. "
+        "List them as separate words, and ensure there are no duplicates. "
+        "Provide the list in a comma-separated format."
+    )
     
     response = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
         messages=[
-            {"role": "system", "content": "You are an experienced People Reader that is able to deduce the key mood exhibited by the person who wrote the journal entry."},
+            {"role": "system", "content": "You are an experienced People Reader who can deduce the key moods or emotions exhibited by the person who wrote the journal entry."},
             {"role": "user", "content": entry},
             {"role": "assistant", "content": prompt},
         ],
-        max_tokens=10,  # Limit the response length to encourage a single-word answer
+        max_tokens=50,  # Increased token limit to accommodate multiple words
         temperature=0.5,
     )
     
-    mood = response.choices[0].message["content"].strip()
-    return mood
+    # Extract the response and split it into a list
+    mood_list = response.choices[0].message["content"].strip()
+    
+    # Split the list by commas and remove any extra whitespace
+    moods = [mood.strip() for mood in mood_list.split(',') if mood.strip()]
+    
+    # Remove duplicates by converting the list to a set and back to a list
+    unique_moods = list(set(moods))
+    
+    return unique_moods
 
 
 # views.py

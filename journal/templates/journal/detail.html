@@ -7,16 +7,16 @@
         <h1 class="mb-4">Journal Entry</h1>
         <div class="card">
             <div class="card-body">
-                <h5 class="card-title">Entry #{{ entry.pk }}</h5>
-                <p class="card-text">{{ entry.content }}</p>
-                <p class="card-text"><strong>Summary:</strong> {{ entry.summary }}</p>
-                <p class="card-text"><strong>Cumulative Summary:</strong> {{ entry.cumulative_summary }}</p>
+                <h5 class="card-title">Entry #{{ entry.id }}</h5>
+                <p class="card-text">{{ entry.entry.content}}</p>
+                <p class="card-text"><strong>Summary:</strong> {{ entry.entry.summary }}</p>
+                <p class="card-text"><strong>Cumulative Summary:</strong> {{ entry.entry.cumulative_summary }}</p>
             </div>
             <div class="card-footer text-muted">
-                <small>Posted on {{ entry.date_created|date:"F j, Y, g:i a" }}</small>
+                <small>Posted on {{ entry.entry.date_created|date:"F j, Y, g:i a" }}</small>
                 <div class="mt-2">
-                    <a href="{% url 'identity_core:similar_journal' entry.pk %}" class="btn btn-primary">Find similar</a>
-                    <a href="{% url 'journal:delete' entry.pk %}" class="btn btn-danger">Delete</a>
+            
+                
                     <a href="{% url 'journal:list' %}" class="btn btn-secondary">Back to Entries</a>
                 </div>
             </div>
