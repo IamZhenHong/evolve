@@ -72,6 +72,75 @@ def summarise(entry,prompt):
     summary = response.choices[0].message["content"].strip()
     return summary
 
+def community_summary(request):
+    with driver.session() as session:
+        # Execute the Cypher query
+        result = session.run("""
+            MATCH (n)-[r]->(m)
+            WHERE exists(n.community) AND exists(m.community) AND n.community = m.community
+            WITH n.community AS community, collect(n) AS nodes, collect(r) AS relationships
+            RETURN community, nodes, relationships
+            ORDER BY community;
+        """)
+
+        # Initialize a list to store community summaries
+        communities = []
+
+        # Process the result
+        for record in result:
+            community_id = record['community']
+            nodes = record['nodes']
+            relationships = record['relationships']
+            
+            # Summarize the nodes
+            node_summary = []
+            for node in nodes:
+                node_summary.append({
+                    'id': node.id,
+                    'labels': list(node.labels),
+                    'properties': dict(node.items())
+                })
+
+            # Summarize the relationships
+            relationship_summary = []
+            for rel in relationships:
+                relationship_summary.append({
+                    'start': rel.start_node.id,
+                    'end': rel.end_node.id,
+                    'type': rel.type,
+                    'properties': dict(rel.items())
+                })
+            
+            # Add the community summary
+            communities.append({
+                'community': community_id,
+                'node_count': len(nodes),
+                'relationship_count': len(relationships),
+                'nodes': node_summary,
+                'relationships': relationship_summary
+            })
+        for community in communities:
+            response = openai.ChatCompletion.create(
+            
+                model="gpt-3.5-turbo",
+                messages=[
+                    {"role": "system", "content": "You are a summarization assistant with a focus on capturing the emotional and event landscape of a community based on detailed node and relationship summaries from a graph database."},
+                    {"role": "user", community: },
+                    {"role": "assistant", "content": " I need a comprehensive summary that highlights key emotional and event-related themes within the community."},
+                ],
+                max_tokens=150,
+                temperature=0.5,
+            )
+            print(response.choices[0].message["content"].strip())
+            community['summary'] = response.choices[0].message["content"].strip()
+
+
+    # Pass the community summaries to the template
+    return render(request, 'community_summary.html', {
+        'communities': communities
+    })
+
+
 def get_mood(entry):
     prompt = (
         "Extract all the distinct moods or emotions exhibited by the writer from the journal entry. "
